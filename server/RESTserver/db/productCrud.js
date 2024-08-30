@@ -1,4 +1,3 @@
-// productCrud.js
 const productModel = require("./models/product");
 
 const createProduct = async (productData) => {
