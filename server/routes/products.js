@@ -1,5 +1,4 @@
 const express = require("express");
-const router = express.Router();
 const {
   createProduct,
   findProducts,
@@ -7,6 +6,8 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../db/productCrud");
+
+const router = express.Router();
 
 // POST a product
 router.post("/", async (req, res) => {
