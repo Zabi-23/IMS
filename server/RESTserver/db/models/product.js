@@ -1,16 +1,31 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const productSchema = new Schema({
-  name: { type: String, required: true },
+const ContactSchema = new Schema({
+  name: String,
+  email: String,
+  phone: String,
+});
+
+const ManufactureSchema = new Schema({
+  name: String,
+  country: String,
+  website: String,
+  description: String,
+  address: String,
+  contact: ContactSchema,
+});
+
+const ProductSchema = new Schema({
+  name: String,
   sku: String,
   description: String,
-  price: { type: Number, required: true },
+  price: Number,
   category: String,
-  manufacturer: { type: Schema.Types.ObjectId, ref: "Manufacturer" },
+  manufacturer: ManufactureSchema,
   amountInStock: Number,
 });
 
-const productModel = mongoose.model("Product", productSchema);
+const productModel = mongoose.model("Product", ProductSchema);
 
 module.exports = productModel;
