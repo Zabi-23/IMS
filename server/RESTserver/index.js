@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const productRouter = require("./routes/products");
 
@@ -8,6 +9,7 @@ dotenv.config({ path: "./config.env" });
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
+app.use(cors());
 
 // MongoDB-connection
 const DB = process.env.DATABASE.replace(
