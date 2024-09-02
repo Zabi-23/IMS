@@ -1,25 +1,21 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const mongoose = require("mongoose");
-
-dotenv.config({ path: "./config.env" });
+dotenv.config(); // Load environment variables from .env file
+const bodyParser = require('body-parser');
+const connectDB = require('./db/connect'); // Ensure this path is correct
+const graphqlRoute = require('./routes/graphql');
 
 const app = express();
+app.use(bodyParser.json());
+
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
-// MongoDB-connection
-const DB = process.env.DATABASE.replace(
-  "<db_PASSWORD>",
-  process.env.DATABASE_PASSWORD
-).replace("<db_NAME>", process.env.DB_NAME);
+// Connect to MongoDB
+connectDB(); // Call the function to connect to MongoDB
 
-mongoose
-  .connect(DB)
-  .then(() =>
-    console.log(`MongoDB connected successfully to ${process.env.DB_NAME}`)
-  )
-  .catch((err) => console.log("Error connecting to MongoDB:", err));
+// GraphQL Route
+app.use('/graphql', graphqlRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

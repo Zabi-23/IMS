@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server/GRAPHQLserver/index.js"
+    "dev": "nodemon server/GRAPHQLserver/index.js",
+    "start": "nodemon server/GRAPHQLserver/index.js"
   },
   "keywords": [],
   "author": "",
