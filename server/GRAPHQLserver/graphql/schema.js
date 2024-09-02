@@ -1,5 +1,6 @@
 // graphql/schema.js
 const { buildSchema } = require('graphql');
+const Product = require('../models/Product');
 
 const schema = buildSchema(`
     type Query {
