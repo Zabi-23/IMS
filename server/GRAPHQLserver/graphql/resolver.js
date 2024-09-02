@@ -1,26 +1,31 @@
 // graphql/resolvers.js
+
+
 const Product = require('../models/Product');
+const Manufacturer = require('../models/Manufacturer');
+const Contact = require('../models/Contact');
 
 const resolvers = {
     products: async () => {
-        return await Product.find();
+        return await Product.find().populate('manufacturer');
     },
     product: async ({ id }) => {
-        return await Product.findById(id);
+        return await Product.findById(id).populate('manufacturer');
     },
     totalStockValue: async () => {
         const products = await Product.find();
         return products.reduce((acc, product) => acc + (product.price * product.amountInStock), 0);
     },
     totalStockValueByManufacturer: async () => {
-        const products = await Product.find();
+        const products = await Product.find().populate('manufacturer');
         const result = {};
 
         products.forEach(product => {
-            const manufacturerName = product.manufacturer.name;
+            const manufacturer = product.manufacturer;
+            const manufacturerName = manufacturer.name;
             if (!result[manufacturerName]) {
                 result[manufacturerName] = {
-                    manufacturer: product.manufacturer,
+                    manufacturer: manufacturer,
                     totalValue: 0
                 };
             }
@@ -30,23 +35,24 @@ const resolvers = {
         return Object.values(result);
     },
     lowStockProducts: async () => {
-        return await Product.find({ amountInStock: { $lt: 10 } });
+        return await Product.find({ amountInStock: { $lt: 10 } }).populate('manufacturer');
     },
     criticalStockProducts: async () => {
-        const products = await Product.find({ amountInStock: { $lt: 5 } });
-        return products.map(product => ({
-            name: product.name,
-            manufacturer: product.manufacturer,
-            contactName: product.manufacturer.contact.name,
-            contactPhone: product.manufacturer.contact.phone,
-            contactEmail: product.manufacturer.contact.email,
-            amountInStock: product.amountInStock
-        }));
+        const products = await Product.find({ amountInStock: { $lt: 5 } }).populate('manufacturer');
+        return products.map(product => {
+            const manufacturer = product.manufacturer;
+            return {
+                name: product.name,
+                manufacturer: manufacturer.name,
+                contactName: manufacturer.contact.name,
+                contactPhone: manufacturer.contact.phone,
+                contactEmail: manufacturer.contact.email,
+                amountInStock: product.amountInStock
+            };
+        });
     },
     manufacturers: async () => {
-        const products = await Product.find();
-        const manufacturers = products.map(product => product.manufacturer);
-        return [...new Map(manufacturers.map(m => [m.name, m])).values()];
+        return await Manufacturer.find();
     },
     addProduct: async ({ name, sku, description, price, category, manufacturer, amountInStock }) => {
         const product = new Product({
