@@ -5,6 +5,9 @@ const {
   findProductById,
   updateProduct,
   deleteProduct,
+  getLowStockProducts,
+  getCriticalStockProducts,
+  getManufacturers
 } = require("../db/productCrud");
 
 const router = express.Router();
@@ -63,6 +66,46 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ message: "Produkten hittades inte" });
     }
     res.json({ message: "Produkten har tagits bort" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get("/low-stock", async (req, res) => {
+  try {
+    const products = await findProducts();
+    const lowStockProducts = products.filter((product) => product.amountInStock < 10);
+    res.json(lowStockProducts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+router.get("/critical-stock", async (req, res) => {
+  try {
+    const products = await findProducts();
+    const criticalStockProducts = products
+      .filter(product => product.amountInStock < 5)
+      .map(product => ({
+        name: product.name,
+        manufacturer: product.manufacturer.name,
+        contactName: product.manufacturer.contact.name,
+        contactPhone: product.manufacturer.contact.phone,
+        contactEmail: product.manufacturer.contact.email
+      }));
+    res.json(criticalStockProducts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+router.get("/manufacturers", async (req, res) => {
+  try {
+    const products = await findProducts();
+    const manufacturers = [...new Set(products.map(product => product.manufacturer))];
+    res.json(manufacturers);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
