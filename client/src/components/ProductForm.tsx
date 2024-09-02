@@ -9,6 +9,7 @@ interface ProductFormProps {
   onContactChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
   resetForm: () => void;
+  onDeleteAll: () => void;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -19,6 +20,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   onContactChange,
   onSubmit,
   resetForm,
+  onDeleteAll,
 }) => {
   return (
     <form
@@ -177,6 +179,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
         className="bg-neutral-500 text-white p-2 rounded ml-2 hover:bg-neutral-400"
       >
         Reset Form
+      </button>
+      <button
+        type="button"
+        onClick={onDeleteAll}
+        className="bg-red-500 text-white p-2 rounded ml-2 hover:bg-red-700"
+      >
+        Delete All Products
       </button>
     </form>
   );

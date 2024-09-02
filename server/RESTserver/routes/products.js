@@ -5,9 +5,10 @@ const {
   findProductById,
   updateProduct,
   deleteProduct,
+  deleteAllProducts,
   getLowStockProducts,
   getCriticalStockProducts,
-  getManufacturers
+  getManufacturers,
 } = require("../db/productCrud");
 
 const router = express.Router();
@@ -71,28 +72,38 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.delete("/", async (req, res) => {
+  try {
+    await deleteAllProducts(); // Anropa deleteAllProducts här
+    res.status(200).send("All products deleted successfully");
+  } catch (error) {
+    res.status(500).send("Error deleting all products");
+  }
+});
+
 router.get("/low-stock", async (req, res) => {
   try {
     const products = await findProducts();
-    const lowStockProducts = products.filter((product) => product.amountInStock < 10);
+    const lowStockProducts = products.filter(
+      (product) => product.amountInStock < 10
+    );
     res.json(lowStockProducts);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-
 router.get("/critical-stock", async (req, res) => {
   try {
     const products = await findProducts();
     const criticalStockProducts = products
-      .filter(product => product.amountInStock < 5)
-      .map(product => ({
+      .filter((product) => product.amountInStock < 5)
+      .map((product) => ({
         name: product.name,
         manufacturer: product.manufacturer.name,
         contactName: product.manufacturer.contact.name,
         contactPhone: product.manufacturer.contact.phone,
-        contactEmail: product.manufacturer.contact.email
+        contactEmail: product.manufacturer.contact.email,
       }));
     res.json(criticalStockProducts);
   } catch (err) {
@@ -100,11 +111,12 @@ router.get("/critical-stock", async (req, res) => {
   }
 });
 
-
 router.get("/manufacturers", async (req, res) => {
   try {
     const products = await findProducts();
-    const manufacturers = [...new Set(products.map(product => product.manufacturer))];
+    const manufacturers = [
+      ...new Set(products.map((product) => product.manufacturer)),
+    ];
     res.json(manufacturers);
   } catch (err) {
     res.status(500).json({ message: err.message });

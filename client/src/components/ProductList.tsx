@@ -9,6 +9,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  deleteAllProducts,
 } from "../API/productApi";
 
 // Importerar komponenter.
@@ -102,6 +103,20 @@ const ProductList: React.FC = () => {
       setProducts(productsData); // Uppdaterar lokalt produkttillstånd med uppdaterad lista.
     } catch (error) {
       setError("Error deleting product"); // Hanterar fel vid borttagning av produkt.
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete all products?"
+    );
+    if (confirmDelete) {
+      try {
+        await deleteAllProducts();
+        setProducts([]);
+      } catch (error) {
+        setError("Error deleting all products");
+      }
     }
   };
 
@@ -213,6 +228,7 @@ const ProductList: React.FC = () => {
         onContactChange={handleContactChange}
         onSubmit={editingProductId ? handleUpdate : handleCreate}
         resetForm={resetForm}
+        onDeleteAll={handleDeleteAll}
       />
 
       {/* Visar filtrerade produkter */}
@@ -249,7 +265,7 @@ const ProductList: React.FC = () => {
             />
           ))
         ) : (
-          <p className="text-center">No products found</p>
+          <p className="text-center text-white">No products found</p>
         )}
       </div>
     </div>

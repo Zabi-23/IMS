@@ -60,3 +60,14 @@ export const deleteProduct = async (productId: string) => {
     throw error;
   }
 };
+
+// Function to delete all products.
+export const deleteAllProducts = async () => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/product/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting all products:", error);
+    throw error;
+  }
+};

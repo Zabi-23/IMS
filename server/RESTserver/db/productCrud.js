@@ -21,10 +21,15 @@ const deleteProduct = async (id) => {
   return productModel.findByIdAndDelete(id);
 };
 
+const deleteAllProducts = async () => {
+  return productModel.deleteMany({});
+};
+
 module.exports = {
   createProduct,
   findProducts,
   findProductById,
   updateProduct,
   deleteProduct,
+  deleteAllProducts,
 };
