@@ -10,6 +10,9 @@ import {
   updateProduct,
   deleteProduct,
   deleteAllProducts,
+  fetchLowStockProducts,
+  fetchCriticalStockProducts,
+  fetchTotalStockValue,
 } from "../API/productApi";
 
 // Importerar komponenter.
@@ -24,6 +27,7 @@ const ProductList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [totalStockValue, setTotalStockValue] = useState<number | null>(null);
 
   // Tillståndsvariabel för formulärdata och redigering.
   const [formState, setFormState] = useState<Omit<Product, "_id">>({
@@ -117,6 +121,35 @@ const ProductList: React.FC = () => {
       } catch (error) {
         setError("Error deleting all products");
       }
+    }
+  };
+
+  // Funktion för att få produkter med lågt lager.
+  const handleFetchLowStock = async () => {
+    try {
+      const lowStockData = await fetchLowStockProducts();
+      setProducts(lowStockData);
+    } catch (error) {
+      setError("Error fetching low stock products");
+    }
+  };
+
+  // Funktion för att få produkter med kritiskt lager.
+  const handleFetchCriticalStock = async () => {
+    try {
+      const criticalStockData = await fetchCriticalStockProducts();
+      setProducts(criticalStockData);
+    } catch (error) {
+      setError("Error fetching critical stock products");
+    }
+  };
+
+  const handleFetchTotalStock = async () => {
+    try {
+      const totalStock = await fetchTotalStockValue();
+      setTotalStockValue(totalStock);
+    } catch (error) {
+      setError("Error fetching total stock value");
     }
   };
 
@@ -219,7 +252,7 @@ const ProductList: React.FC = () => {
       {/* Felmeddelande */}
       {error && <p className="text-center text-red-500">{error}</p>}
 
-      {/* Formulär för att skapa eller uppdatera produkter */}
+      {/* Props som skickas vidare till ProductForm komponenten. */}
       <ProductForm
         product={formState}
         isEditing={!!editingProductId}
@@ -229,6 +262,10 @@ const ProductList: React.FC = () => {
         onSubmit={editingProductId ? handleUpdate : handleCreate}
         resetForm={resetForm}
         onDeleteAll={handleDeleteAll}
+        onFetchLowStock={handleFetchLowStock}
+        onFetchCriticalStock={handleFetchCriticalStock}
+        onFetchTotalStock={handleFetchTotalStock}
+        totalStockValue={totalStockValue}
       />
 
       {/* Visar filtrerade produkter */}
