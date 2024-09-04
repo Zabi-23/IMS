@@ -8,12 +8,75 @@ const {
   deleteAllProducts,
   getLowStockProducts,
   getCriticalStockProducts,
+  getTotalStockValue,
   getManufacturers,
+  getStockValueByManufacturerId,
 } = require("../db/productCrud");
 
 const router = express.Router();
 
-// POST a product
+// GET: Products with low stock
+router.get("/low-stock", async (req, res) => {
+  try {
+    const lowStock = await getLowStockProducts();
+    res.status(200).json(lowStock);
+  } catch (error) {
+    res.status(500).json({
+      message: `Error retrieving low stock products: ${error.message}`,
+    });
+  }
+});
+
+// GET: Products with critical stock
+router.get("/critical-stock", async (req, res) => {
+  try {
+    const criticalStock = await getCriticalStockProducts();
+    res.status(200).json(criticalStock);
+  } catch (error) {
+    res.status(500).json({
+      message: `Error retrieving critical stock products: ${error.message}`,
+    });
+  }
+});
+
+// GET: Total stock value
+router.get("/total-stock-value", async (req, res) => {
+  try {
+    const totalStockValue = await getTotalStockValue();
+    res.status(200).json({ totalStockValue });
+  } catch (error) {
+    res.status(500).json({
+      message: `Error retrieving total stock value: ${error.message}`,
+    });
+  }
+});
+
+// GET: All manufacturers
+router.get("/manufacturers", async (req, res) => {
+  try {
+    const manufacturers = await getManufacturers();
+    res.status(200).json(manufacturers);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: `Error retrieving manufacturers: ${error.message}` });
+  }
+});
+
+// GET: Stock value by manufacturer ID
+router.get("/stock-value/:manufacturerId", async (req, res) => {
+  try {
+    const { manufacturerId } = req.params;
+    const stockValue = await getStockValueByManufacturerId(manufacturerId);
+    res.status(200).json({ stockValue });
+  } catch (error) {
+    res.status(500).json({
+      message: `Error retrieving stock value for manufacturer: ${error.message}`,
+    });
+  }
+});
+
+// Create a product
 router.post("/", async (req, res) => {
   try {
     const newProduct = await createProduct(req.body);
@@ -72,54 +135,13 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// DELETE delete all products
 router.delete("/", async (req, res) => {
   try {
-    await deleteAllProducts(); // Anropa deleteAllProducts här
+    await deleteAllProducts();
     res.status(200).send("All products deleted successfully");
   } catch (error) {
     res.status(500).send("Error deleting all products");
-  }
-});
-
-router.get("/low-stock", async (req, res) => {
-  try {
-    const products = await findProducts();
-    const lowStockProducts = products.filter(
-      (product) => product.amountInStock < 10
-    );
-    res.json(lowStockProducts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-router.get("/critical-stock", async (req, res) => {
-  try {
-    const products = await findProducts();
-    const criticalStockProducts = products
-      .filter((product) => product.amountInStock < 5)
-      .map((product) => ({
-        name: product.name,
-        manufacturer: product.manufacturer.name,
-        contactName: product.manufacturer.contact.name,
-        contactPhone: product.manufacturer.contact.phone,
-        contactEmail: product.manufacturer.contact.email,
-      }));
-    res.json(criticalStockProducts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-router.get("/manufacturers", async (req, res) => {
-  try {
-    const products = await findProducts();
-    const manufacturers = [
-      ...new Set(products.map((product) => product.manufacturer)),
-    ];
-    res.json(manufacturers);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
 });
 
