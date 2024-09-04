@@ -9,10 +9,7 @@ const connectDB = async () => {
       .replace("<dbname>", process.env.DB_NAME);
 
     // Connect to MongoDB
-    await mongoose.connect(DB, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(DB);
 
     console.log(`MongoDB connected successfully to ${process.env.DB_NAME}`);
   } catch (err) {
