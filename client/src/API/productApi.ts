@@ -71,3 +71,67 @@ export const deleteAllProducts = async () => {
     throw error;
   }
 };
+
+// Function to get products with low stock
+export const fetchLowStockProducts = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/product/low-stock`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching low stock products:", error);
+    throw error;
+  }
+};
+
+// Function to get products with critical stock
+export const fetchCriticalStockProducts = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/product/critical-stock`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching critical stock products:", error);
+    throw error;
+  }
+};
+
+// Function to get total stock value
+export const fetchTotalStockValue = async () => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/product/total-stock-value`
+    );
+    return response.data.totalStockValue;
+  } catch (error) {
+    console.error("Error fetching total stock value:", error);
+    throw error;
+  }
+};
+
+// Function to get all manufacturers
+export const fetchManufacturers = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/product/manufacturers`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching manufacturers:", error);
+    throw error;
+  }
+};
+
+// Function to get stock value by manufacturer ID
+export const fetchStockValueByManufacturerId = async (
+  manufacturerId: string
+) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/product/stock-value/${manufacturerId}`
+    );
+    return response.data.stockValue;
+  } catch (error) {
+    console.error(
+      `Error fetching stock value for manufacturer ${manufacturerId}:`,
+      error
+    );
+    throw error;
+  }
+};

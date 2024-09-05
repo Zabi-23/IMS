@@ -1,9 +1,9 @@
 const express = require("express");
 const { graphqlHTTP } = require('express-graphql');
 const dotenv = require("dotenv");
-dotenv.config(); // Load environment variables from .env file
+dotenv.config(); 
 const bodyParser = require('body-parser');
-const connectDB = require('./db/connect'); // Ensure this path is correct
+const connectDB = require('./db/connect'); 
 const graphqlRoute = require('./routes/graphql');
 const schema = require('./graphql/schema');
 const resolvers = require('./graphql/resolver');
@@ -11,15 +11,15 @@ const resolvers = require('./graphql/resolver');
 const app = express();
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 app.use(express.json());
 app.use('/graphql', graphqlHTTP({
   schema: schema,
   rootValue: resolvers,
-  graphiql: true, // Enable GraphiQL interface
+  graphiql: true, 
 }))
 // Connect to MongoDB
-connectDB(); // Call the function to connect to MongoDB
+connectDB(); 
 
 // GraphQL Route
 app.use('/graphql', graphqlRoute);
