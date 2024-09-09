@@ -44,7 +44,7 @@ const getCriticalStockProducts = async () => {
       .find({
         amountInStock: { $lt: 5 },
       })
-      .select("manufacturer contact.name contact.phone contact.email");
+      .select("manufacturer contact.name contact.phone contact.email amountInStock");
     return criticalStockProducts;
   } catch (error) {
     throw new Error(
