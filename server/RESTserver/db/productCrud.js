@@ -37,12 +37,19 @@ const getLowStockProducts = async () => {
   }
 };
 
-// Get products with critical stock (less than 3 units)
+// Get products with critical stock (less than 5 units)
 const getCriticalStockProducts = async () => {
   try {
-    return await productModel.find({ amountInStock: { $lt: 3 } });
+    const criticalStockProducts = await productModel
+      .find({
+        amountInStock: { $lt: 5 },
+      })
+      .select("manufacturer contact.name contact.phone contact.email");
+    return criticalStockProducts;
   } catch (error) {
-    throw new Error(`Failed to get critical stock products: ${error.message}`);
+    throw new Error(
+      `Failed to retrieve critical stock products: ${error.message}`
+    );
   }
 };
 
@@ -59,23 +66,6 @@ const getTotalStockValue = async () => {
   }
 };
 
-// Get total stock value by manufacturer ID
-const getStockValueByManufacturerId = async (manufacturerId) => {
-  try {
-    const products = await productModel.find({
-      "manufacturer._id": manufacturerId,
-    });
-    return products.reduce(
-      (total, product) => total + product.price * product.amountInStock,
-      0
-    );
-  } catch (error) {
-    throw new Error(
-      `Failed to get stock value by manufacturer ID: ${error.message}`
-    );
-  }
-};
-
 // Get a list of all manufacturers
 const getManufacturers = async () => {
   try {
@@ -83,6 +73,27 @@ const getManufacturers = async () => {
     return manufacturers;
   } catch (error) {
     throw new Error(`Failed to get manufacturers: ${error.message}`);
+  }
+};
+
+// Get total stock value by manufacturer name
+const getTotalStockValueByManufacturer = async () => {
+  try {
+    const stockValueByManufacturer = await productModel.aggregate([
+      {
+        $group: {
+          _id: "$manufacturer.name",
+          totalStockValue: {
+            $sum: { $multiply: ["$price", "$amountInStock"] },
+          },
+        },
+      },
+    ]);
+    return stockValueByManufacturer;
+  } catch (error) {
+    throw new Error(
+      `Failed to calculate total stock value by manufacturer: ${error.message}`
+    );
   }
 };
 
@@ -96,6 +107,6 @@ module.exports = {
   getLowStockProducts,
   getCriticalStockProducts,
   getTotalStockValue,
-  getStockValueByManufacturerId,
   getManufacturers,
+  getTotalStockValueByManufacturer,
 };

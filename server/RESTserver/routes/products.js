@@ -10,12 +10,12 @@ const {
   getCriticalStockProducts,
   getTotalStockValue,
   getManufacturers,
-  getStockValueByManufacturerId,
 } = require("../db/productCrud");
+const productModel = require("../db/models/product");
 
 const router = express.Router();
 
-// GET: Products with low stock
+// GET Products with low stock
 router.get("/low-stock", async (req, res) => {
   try {
     const lowStock = await getLowStockProducts();
@@ -27,7 +27,7 @@ router.get("/low-stock", async (req, res) => {
   }
 });
 
-// GET: Products with critical stock
+// GET Products with critical stock
 router.get("/critical-stock", async (req, res) => {
   try {
     const criticalStock = await getCriticalStockProducts();
@@ -39,7 +39,7 @@ router.get("/critical-stock", async (req, res) => {
   }
 });
 
-// GET: Total stock value
+// GET Total stock value
 router.get("/total-stock-value", async (req, res) => {
   try {
     const totalStockValue = await getTotalStockValue();
@@ -51,7 +51,7 @@ router.get("/total-stock-value", async (req, res) => {
   }
 });
 
-// GET: All manufacturers
+// GET All manufacturers
 router.get("/manufacturers", async (req, res) => {
   try {
     const manufacturers = await getManufacturers();
@@ -63,16 +63,23 @@ router.get("/manufacturers", async (req, res) => {
   }
 });
 
-// GET: Stock value by manufacturer ID
-router.get("/stock-value/:manufacturerId", async (req, res) => {
+//GET Total stock value by manufacturer
+router.get("/total-stock-value-by-manufacturer", async (req, res) => {
   try {
-    const { manufacturerId } = req.params;
-    const stockValue = await getStockValueByManufacturerId(manufacturerId);
-    res.status(200).json({ stockValue });
+    const stockValueByManufacturer = await productModel.aggregate([
+      {
+        $group: {
+          _id: "$manufacturer.name",
+          totalStockValue: {
+            $sum: { $multiply: ["$price", "$amountInStock"] },
+          },
+        },
+      },
+    ]);
+
+    res.json(stockValueByManufacturer);
   } catch (error) {
-    res.status(500).json({
-      message: `Error retrieving stock value for manufacturer: ${error.message}`,
-    });
+    res.status(500).json({ message: "Error calculating total stock value" });
   }
 });
 
