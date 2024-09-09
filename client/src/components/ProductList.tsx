@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Importerar Product-typen från typer.
-import Product from "../types";
+import { Product, Manufacturer } from "../types";
 
 // Importerar API-funktioner för produkthantering.
 import {
@@ -13,17 +13,20 @@ import {
   fetchLowStockProducts,
   fetchCriticalStockProducts,
   fetchTotalStockValue,
+  fetchManufacturers,
 } from "../API/productApi";
 
 // Importerar komponenter.
 import ProductForm from "./ProductForm";
 import ProductCard from "./ProductCard";
+import ManufacturerCard from "./ManufacturerCard";
 import Loader from "./Loader";
 
 // Komponent för att hantera listning och CRUD-operationer för produkter.
 const ProductList: React.FC = () => {
   // Tillståndsvariabler för produkter, sökning, laddning och felhantering.
   const [products, setProducts] = useState<Product[]>([]);
+  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +55,7 @@ const ProductList: React.FC = () => {
   });
   // Tillståndsvariabel för identifiering av redigerad produkt.
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [showManufacturers, setShowManufacturers] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProductsData = async () => {
@@ -150,6 +154,20 @@ const ProductList: React.FC = () => {
       setTotalStockValue(totalStock);
     } catch (error) {
       setError("Error fetching total stock value");
+    }
+  };
+
+  const handleFetchManufacturers = async () => {
+    if (showManufacturers) {
+      setShowManufacturers(false);
+    } else {
+      try {
+        const manufacturersData = await fetchManufacturers();
+        setManufacturers(manufacturersData);
+        setShowManufacturers(true);
+      } catch (error) {
+        setError("Error fetching manufacturers");
+      }
     }
   };
 
@@ -266,11 +284,22 @@ const ProductList: React.FC = () => {
         onFetchCriticalStock={handleFetchCriticalStock}
         onFetchTotalStock={handleFetchTotalStock}
         totalStockValue={totalStockValue}
+        onFetchManufacturers={handleFetchManufacturers}
       />
 
-      {/* Visar filtrerade produkter */}
       <div className="flex flex-row gap-6 flex-wrap">
-        {filteredProducts.length > 0 ? (
+        {showManufacturers ? (
+          manufacturers.length > 0 ? (
+            manufacturers.map((manufacturer) => (
+              <ManufacturerCard
+                key={manufacturer.id}
+                manufacturer={manufacturer}
+              />
+            ))
+          ) : (
+            <p className="text-center text-white">No manufacturers found</p>
+          )
+        ) : filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <ProductCard
               key={product._id}

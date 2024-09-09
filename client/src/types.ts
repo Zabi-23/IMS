@@ -1,4 +1,4 @@
-export default interface Product {
+export interface Product {
   _id?: string;
   name: string;
   description: string;
@@ -17,5 +17,19 @@ export default interface Product {
       email: string;
       phone: string;
     };
+  };
+}
+
+export interface Manufacturer {
+  id?: string;
+  name: string;
+  country: string;
+  website: string;
+  description: string;
+  address: string;
+  contact: {
+    name: string;
+    email: string;
+    phone: string;
   };
 }

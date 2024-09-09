@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Product from "../types";
+import { Product } from "../types";
 import Modal from "./Modal";
 import Accordion from "./Accordion";
 
@@ -16,6 +16,7 @@ interface ProductFormProps {
   onFetchCriticalStock: () => void;
   onFetchTotalStock: () => void;
   totalStockValue: number | null;
+  onFetchManufacturers: () => void;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -31,6 +32,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   onFetchCriticalStock,
   onFetchTotalStock,
   totalStockValue,
+  onFetchManufacturers,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -197,6 +199,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           onFetchCriticalStock={onFetchCriticalStock}
           onFetchTotalStock={onFetchTotalStock}
           onOpenModal={handleOpenModal}
+          onFetchManufacturers={onFetchManufacturers}
         />
       </form>
 

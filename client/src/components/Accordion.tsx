@@ -6,6 +6,7 @@ interface AccordionProps {
   onFetchCriticalStock: () => void;
   onFetchTotalStock: () => void;
   onOpenModal: () => void;
+  onFetchManufacturers: () => void;
 }
 
 const Accordion: React.FC<AccordionProps> = ({
@@ -13,10 +14,17 @@ const Accordion: React.FC<AccordionProps> = ({
   onFetchLowStock,
   onFetchCriticalStock,
   onOpenModal,
+  onFetchManufacturers,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showManufacturers, setShowManufacturers] = useState(false);
 
   const handleToggle = () => setIsOpen(!isOpen);
+
+  const handleShowManufacturersToggle = () => {
+    setShowManufacturers(!showManufacturers);
+    onFetchManufacturers();
+  };
 
   return (
     <div className="my-4">
@@ -50,6 +58,13 @@ const Accordion: React.FC<AccordionProps> = ({
             onClick={onOpenModal}
           >
             Show Total Stock Value
+          </button>
+          <button
+            type="button"
+            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700 w-full"
+            onClick={handleShowManufacturersToggle}
+          >
+            {showManufacturers ? "Hide Manufacturers" : "Show Manufacturers"}
           </button>
           <button
             type="button"
