@@ -14,6 +14,7 @@ import {
   fetchCriticalStockProducts,
   fetchTotalStockValue,
   fetchManufacturers,
+  fetchTotalStockValueByManufacturer,
 } from "../API/productApi";
 
 // Importerar komponenter.
@@ -171,6 +172,16 @@ const ProductList: React.FC = () => {
     }
   };
 
+  const handleFetchStockValueByManufacturer = async () => {
+    try {
+      const stockValueByManufacturer =
+        await fetchTotalStockValueByManufacturer();
+      console.log(stockValueByManufacturer);
+    } catch (error) {
+      setError("Error fetching stock value by manufacturer");
+    }
+  };
+
   // Funktion för att hantera ändringar i formulärfält för produktdetaljer.
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -285,6 +296,7 @@ const ProductList: React.FC = () => {
         onFetchTotalStock={handleFetchTotalStock}
         totalStockValue={totalStockValue}
         onFetchManufacturers={handleFetchManufacturers}
+        onFetchStockValueByManufacturer={handleFetchStockValueByManufacturer}
       />
 
       <div className="flex flex-row gap-6 flex-wrap">

@@ -7,6 +7,7 @@ interface AccordionProps {
   onFetchTotalStock: () => void;
   onOpenModal: () => void;
   onFetchManufacturers: () => void;
+  onFetchStockValueByManufacturer: () => void;
 }
 
 const Accordion: React.FC<AccordionProps> = ({
@@ -15,6 +16,7 @@ const Accordion: React.FC<AccordionProps> = ({
   onFetchCriticalStock,
   onOpenModal,
   onFetchManufacturers,
+  onFetchStockValueByManufacturer,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showManufacturers, setShowManufacturers] = useState(false);
@@ -40,7 +42,7 @@ const Accordion: React.FC<AccordionProps> = ({
         <div className="mt-2 space-y-2 w-52">
           <button
             type="button"
-            className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-400 w-full"
+            className="bg-yellow-700 text-white p-2 rounded hover:bg-yellow-600 w-full"
             onClick={onFetchLowStock}
           >
             Show Low Stock Products
@@ -58,6 +60,13 @@ const Accordion: React.FC<AccordionProps> = ({
             onClick={onOpenModal}
           >
             Show Total Stock Value
+          </button>
+          <button
+            type="button"
+            className="bg-sky-400 text-white p-2 rounded hover:bg-sky-600 w-full"
+            onClick={onFetchStockValueByManufacturer}
+          >
+            Show Stock Value by Manufacturer
           </button>
           <button
             type="button"

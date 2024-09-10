@@ -118,20 +118,15 @@ export const fetchManufacturers = async () => {
   }
 };
 
-// Function to get stock value by manufacturer ID
-export const fetchStockValueByManufacturerId = async (
-  manufacturerId: string
-) => {
+// Function to get total stock value by manufacturer
+export const fetchTotalStockValueByManufacturer = async () => {
   try {
     const response = await axios.get(
-      `${API_BASE_URL}/product/stock-value/${manufacturerId}`
+      `${API_BASE_URL}/product/total-stock-value-by-manufacturer`
     );
-    return response.data.stockValue;
+    return response.data;
   } catch (error) {
-    console.error(
-      `Error fetching stock value for manufacturer ${manufacturerId}:`,
-      error
-    );
+    console.error("Error fetching total stock value by manufacturer:", error);
     throw error;
   }
 };
