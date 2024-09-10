@@ -1,16 +1,21 @@
-const { GraphQLObjectType, GraphQLString, GraphQLID } = require('graphql');
+const mongoose = require('mongoose');
 
-const ManufacturerType = new GraphQLObjectType({
-  name: 'Manufacturer',
-  fields: () => ({
-    id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    country: { type: GraphQLString },
-    website: { type: GraphQLString },
-    description: { type: GraphQLString },
-    address: { type: GraphQLString },
-    contact: { type: GraphQLID }
-  })
+const ContactSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    phone: String,
 });
 
-module.exports = ManufacturerType;
+const ManufacturerSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    country: String,
+    website: String,
+    description: String,
+    address: String,
+    contact: ContactSchema
+});
+
+// Check if the model already exists before defining it
+const Manufacturer = mongoose.models.Manufacturer || mongoose.model('Manufacturer', ManufacturerSchema);
+
+module.exports = Manufacturer;
