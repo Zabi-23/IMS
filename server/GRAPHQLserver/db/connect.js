@@ -1,12 +1,13 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const connectDB = async () => {
   try {
     // Construct the MongoDB connection string
-    const DB = process.env.DATABASE
-      .replace("<password>", process.env.DATABASE_PASSWORD)
-      .replace("<dbname>", process.env.DB_NAME);
+    const DB = process.env.DATABASE.replace(
+      "<db_PASSWORD>",
+      process.env.DATABASE_PASSWORD
+    ).replace("<db_NAME>", process.env.DB_NAME);
 
     // Connect to MongoDB
     await mongoose.connect(DB);

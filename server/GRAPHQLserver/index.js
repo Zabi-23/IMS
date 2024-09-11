@@ -1,29 +1,27 @@
 const express = require("express");
-const { graphqlHTTP } = require('express-graphql');
-const dotenv = require("dotenv");
-dotenv.config(); 
-const bodyParser = require('body-parser');
-const connectDB = require('./db/connect'); 
-const graphqlRoute = require('./routes/graphql');
-const schema = require('./graphql/schema');
-const resolvers = require('./graphql/resolver');
+const cors = require("cors");
+const { graphqlHTTP } = require("express-graphql");
+const connectDB = require("./db/connect");
+const schema = require("./graphql/schema");
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(cors());
 
 const PORT = process.env.PORT || 4000;
 app.use(express.json());
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: resolvers,
-  graphiql: true, 
-}))
-// Connect to MongoDB
-connectDB(); 
 
-// GraphQL Route
-app.use('/graphql', graphqlRoute);
+// Connect to MongoDB
+connectDB();
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    graphiql: true,
+  })
+);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Running a GraphQL server on port ${PORT}`);
 });

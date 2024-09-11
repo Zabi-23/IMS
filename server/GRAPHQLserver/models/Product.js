@@ -1,49 +1,35 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-
-const productSchema = new Schema({
+//Contact schema
+const ContactSchema = new Schema({
   name: String,
-  sku: String,
+  email: String,
+  phone: String,
+});
+
+//Manufacturer schema
+const ManufactureSchema = new Schema({
+  name: String,
+  country: String,
+  website: String,
+  description: String,
+  address: String,
+  contact: ContactSchema,
+});
+
+//Product schema
+const ProductSchema = new Schema({
+  name: String,
+  sku: Number,
   description: String,
   price: Number,
   category: String,
-  manufacturer: { type: Schema.Types.ObjectId, ref: 'Manufacturer' },
-  amountInStock: Number
+  manufacturer: ManufactureSchema,
+  amountInStock: Number,
 });
 
-//Model för kontakt
-const contactSchema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true, match: /.+\@.+\..+/ }, // Validering för e-postformat
-  phone: { type: String, match: /^[\d\+\-\(\) ]+$/ }, // Validering för telefonnummerformat
-  message: String,
-});
+//Product model
+const Product = mongoose.model("Product", ProductSchema);
 
-//Model för Tillverkare
-const manufacturerSchema = new Schema({
-  name: { type: String, required: true },
-  country: String,
-  website: String,
-  description: String, 
-  address: {
-    street: String,
-    city: String,
-    zipCode: String,
-    country: String,
-  },
-  contact: contactSchema,
-  products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
-});
-
-
-const Manufacturer = mongoose.model('Manufacturer', manufacturerSchema);
-const Contact = mongoose.model('Contact', contactSchema);
-const Product = mongoose.model('Product', productSchema);
-
-module.exports = Product, Manufacturer, Contact;
-
-
-
-
-
+module.exports = { Product };
