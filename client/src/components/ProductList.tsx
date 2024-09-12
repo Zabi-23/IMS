@@ -320,7 +320,7 @@ const ProductList: React.FC = () => {
           manufacturers.length > 0 ? (
             manufacturers.map((manufacturer) => (
               <ManufacturerCard
-                key={manufacturer.id}
+                key={manufacturer._id}
                 manufacturer={manufacturer}
               />
             ))
