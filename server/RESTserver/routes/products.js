@@ -93,10 +93,27 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET all products
+// GET all products with pagination and filtering
 router.get("/", async (req, res) => {
   try {
-    const products = await findProducts();
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      manufacturer,
+      amountInStock,
+    } = req.query;
+
+    let filter = {};
+    if (category) filter.category = category;
+    if (manufacturer) filter["manufacturer.name"] = manufacturer;
+    if (amountInStock) filter.amountInStock = { $gte: amountInStock };
+
+    const products = await productModel
+      .find(filter)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });

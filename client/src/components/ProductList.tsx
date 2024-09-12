@@ -57,14 +57,26 @@ const ProductList: React.FC = () => {
   // Tillståndsvariabel för identifiering av redigerad produkt.
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showManufacturers, setShowManufacturers] = useState<boolean>(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const fetchProductsData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const productsData = await fetchProducts();
-        setProducts(productsData);
+        const productsData = await fetchProducts(page, 10)
+        if (productsData.length < 10) {
+          setHasMore(false);
+        }
+
+        setProducts((prevProducts) => {
+          const newProducts = productsData.filter(
+            (product: Product) =>
+              !prevProducts.some((p) => p._id === product._id)
+          );
+          return [...prevProducts, ...newProducts];
+        });
       } catch (error) {
         setError("Error fetching products");
       } finally {
@@ -73,7 +85,11 @@ const ProductList: React.FC = () => {
     };
 
     fetchProductsData();
-  }, []);
+  }, [page]);
+
+  const loadMoreProducts = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
 
   // Funktion för att skapa en ny produkt.
   const handleCreate = async () => {
@@ -299,7 +315,7 @@ const ProductList: React.FC = () => {
         onFetchStockValueByManufacturer={handleFetchStockValueByManufacturer}
       />
 
-      <div className="flex flex-row gap-6 flex-wrap">
+      <div className="flex flex-row gap-6 flex-wrap justify-center">
         {showManufacturers ? (
           manufacturers.length > 0 ? (
             manufacturers.map((manufacturer) => (
@@ -344,6 +360,16 @@ const ProductList: React.FC = () => {
           ))
         ) : (
           <p className="text-center text-white">No products found</p>
+        )}
+      </div>
+      <div className="flex items-center justify-center">
+        {hasMore && (
+          <button
+            onClick={loadMoreProducts}
+            className="m-10 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700"
+          >
+            Show More
+          </button>
         )}
       </div>
     </div>

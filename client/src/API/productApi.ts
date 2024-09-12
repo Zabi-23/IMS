@@ -14,10 +14,10 @@ export const createProduct = async (productData: Product) => {
   }
 };
 
-// Function to get all products.
-export const fetchProducts = async () => {
+// Function to get all products with pagination.
+export const fetchProducts = async (page = 1, limit = 10) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/product/`);
+    const response = await axios.get(`${API_BASE_URL}/product/?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
