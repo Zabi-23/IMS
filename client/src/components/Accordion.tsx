@@ -8,6 +8,7 @@ interface AccordionProps {
   onOpenModal: () => void;
   onFetchManufacturers: () => void;
   onFetchStockValueByManufacturer: () => void;
+  onShowAllProducts: () => void;
 }
 
 const Accordion: React.FC<AccordionProps> = ({
@@ -17,6 +18,7 @@ const Accordion: React.FC<AccordionProps> = ({
   onOpenModal,
   onFetchManufacturers,
   onFetchStockValueByManufacturer,
+  onShowAllProducts,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showManufacturers, setShowManufacturers] = useState(false);
@@ -40,6 +42,13 @@ const Accordion: React.FC<AccordionProps> = ({
       </button>
       {isOpen && (
         <div className="mt-2 space-y-2 w-52">
+          <button
+            type="button"
+            className=" text-white p-2 rounded w-full bg-amber-800 hover:bg-amber-600"
+            onClick={onShowAllProducts}
+          >
+            Show All Products
+          </button>
           <button
             type="button"
             className="bg-yellow-700 text-white p-2 rounded hover:bg-yellow-600 w-full"

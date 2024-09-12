@@ -65,7 +65,7 @@ const ProductList: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const productsData = await fetchProducts(page, 10)
+        const productsData = await fetchProducts(page, 10);
         if (productsData.length < 10) {
           setHasMore(false);
         }
@@ -234,6 +234,15 @@ const ProductList: React.FC = () => {
     }));
   };
 
+  const handleShowAllProducts = async () => {
+    try {
+      const productsData = await fetchProducts();
+      setProducts(productsData);
+    } catch (error) {
+      setError("Error fetching all products");
+    }
+  };
+
   // Funktion för att återställa formuläret till ursprungstillstånd.
   const resetForm = () => {
     setFormState({
@@ -313,6 +322,7 @@ const ProductList: React.FC = () => {
         totalStockValue={totalStockValue}
         onFetchManufacturers={handleFetchManufacturers}
         onFetchStockValueByManufacturer={handleFetchStockValueByManufacturer}
+        onShowAllProducts={handleShowAllProducts}
       />
 
       <div className="flex flex-row gap-6 flex-wrap justify-center">

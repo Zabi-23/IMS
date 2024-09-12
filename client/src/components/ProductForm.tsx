@@ -18,6 +18,7 @@ interface ProductFormProps {
   totalStockValue: number | null;
   onFetchManufacturers: () => void;
   onFetchStockValueByManufacturer: () => void;
+  onShowAllProducts: () => void;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -35,6 +36,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   totalStockValue,
   onFetchManufacturers,
   onFetchStockValueByManufacturer,
+  onShowAllProducts,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -203,6 +205,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           onOpenModal={handleOpenModal}
           onFetchManufacturers={onFetchManufacturers}
           onFetchStockValueByManufacturer={onFetchStockValueByManufacturer}
+          onShowAllProducts={onShowAllProducts}
         />
       </form>
 
