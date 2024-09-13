@@ -37,7 +37,7 @@ export const fetchProductById = async (productId: string) => {
 };
 
 // Function to update a product by ID.
-export const updateProduct = async (productId: string, productData: any) => {
+export const updateProduct = async (productId: string, productData: Product) => {
   try {
     const response = await axios.put(
       `${API_BASE_URL}/product/${productId}`,

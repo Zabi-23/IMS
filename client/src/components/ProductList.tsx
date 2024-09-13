@@ -97,15 +97,21 @@ const ProductList: React.FC = () => {
     try {
       if (editingProductId) {
         // Om vi redigerar en produkt, uppdatera den.
-        await updateProduct(editingProductId, {
+        const updatedProduct = await updateProduct(editingProductId, {
           ...formState,
           _id: editingProductId,
         });
+        // Uppdaterar produktlistan med den redigerade produkten.
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product._id === editingProductId ? updatedProduct : product
+          )
+        );
       } else {
-        // Annars, skapa en ny produkt.
-        await createProduct(formState);
+        // Om vi skapar en ny produkt, lägger den överst i listan.
+        const newProduct = await createProduct(formState);
+        setProducts((prevProducts) => [newProduct, ...prevProducts]); // Lägger till den nya produkten överst.
       }
-      setProducts(await fetchProducts()); // Uppdaterar produktlistan efter ändringar.
       resetForm(); // Återställ formuläret.
     } catch {
       setError(
