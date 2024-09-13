@@ -21,7 +21,7 @@ export interface Product {
 }
 
 export interface Manufacturer {
-  _id: string;
+  _id?: string;
   name: string;
   country: string;
   website: string;
