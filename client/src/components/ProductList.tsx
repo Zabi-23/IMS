@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
-// Importerar Product-typen från typer.
+// Importerar Product- och Manufacturer-typen från typer.
 import { Product, Manufacturer } from "../types";
 
-// Importerar API-funktioner för produkthantering.
+// Importerar API-funktioner som används för att hämta, skapa, uppdatera och ta bort produkter och tillverkare.
 import {
   fetchProducts,
   createProduct,
@@ -17,31 +17,35 @@ import {
   fetchTotalStockValueByManufacturer,
 } from "../API/productApi";
 
-// Importerar komponenter.
+// Importerar komponenter som används i applikationen.
 import ProductForm from "./ProductForm";
 import ProductCard from "./ProductCard";
 import ManufacturerCard from "./ManufacturerCard";
-import Loader from "./Loader";
+import Loader from "./Loader"; // Komponent för att visa laddningsindikator.
 
-// Komponent för att hantera listning och CRUD-operationer för produkter.
 const ProductList: React.FC = () => {
-  // Tillståndsvariabler för produkter, sökning, laddning och felhantering.
-  const [products, setProducts] = useState<Product[]>([]);
-  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [totalStockValue, setTotalStockValue] = useState<number | null>(null);
+  // Använder useState för att hantera olika tillstånd (state) i komponenten.
+  const [products, setProducts] = useState<Product[]>([]); // Tillstånd för lagring av produkter.
+  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]); // Tillstånd för lagring av tillverkare.
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Tillstånd för att lagra sökfrågan.
+  const [loading, setLoading] = useState<boolean>(false); // Tillstånd för att indikera om data laddas.
+  const [error, setError] = useState<string | null>(null); // Tillstånd för att hantera felmeddelanden.
+  const [totalStockValue, setTotalStockValue] = useState<number | null>(null); // Tillstånd för att lagra total lagervärde.
+  const [editingProductId, setEditingProductId] = useState<string | null>(null); // Tillstånd för att lagra ID för den produkt som redigeras.
+  const [showManufacturers, setShowManufacturers] = useState<boolean>(false); // Tillstånd för att visa eller dölja tillverkarkort.
+  const [page, setPage] = useState(1); // Tillstånd för att hantera aktuell sidnummer för pagination.
+  const [hasMore, setHasMore] = useState(true); // Tillstånd för att indikera om det finns fler produkter att ladda.
 
-  // Tillståndsvariabel för formulärdata och redigering.
-  const [formState, setFormState] = useState<Omit<Product, "_id">>({
-    name: "",
-    description: "",
-    price: 0,
-    amountInStock: 0,
-    sku: "",
-    category: "",
+  // Förvalda värden för formuläret som används för att skapa eller uppdatera produkter.
+  const resetFormState = {
+    name: "", // Tomt namn på produkten
+    description: "", // Tom beskrivning
+    price: 0, // Priset är 0
+    amountInStock: 0, // Antal i lager
+    sku: "", // SKU för produkten
+    category: "", // Kategori
     manufacturer: {
+      // Tom tillverkarinformation
       name: "",
       country: "",
       website: "",
@@ -53,235 +57,189 @@ const ProductList: React.FC = () => {
         phone: "",
       },
     },
-  });
-  // Tillståndsvariabel för identifiering av redigerad produkt.
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [showManufacturers, setShowManufacturers] = useState<boolean>(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  useEffect(() => {
-    const fetchProductsData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const productsData = await fetchProducts(page, 10);
-        if (productsData.length < 10) {
-          setHasMore(false);
-        }
-
-        setProducts((prevProducts) => {
-          const newProducts = productsData.filter(
-            (product: Product) =>
-              !prevProducts.some((p) => p._id === product._id)
-          );
-          return [...prevProducts, ...newProducts];
-        });
-      } catch (error) {
-        setError("Error fetching products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProductsData();
-  }, [page]);
-
-  const loadMoreProducts = () => {
-    setPage((prevPage) => prevPage + 1);
   };
 
-  // Funktion för att skapa en ny produkt.
-  const handleCreate = async () => {
+  // Tillstånd för formulärets nuvarande värden.
+  const [formState, setFormState] =
+    useState<Omit<Product, "_id">>(resetFormState);
+
+  // Funktion för att hämta produktdata från servern (med pagination).
+  const fetchProductsData = useCallback(async () => {
+    setLoading(true); // Anger att data laddas.
+    setError(null); // Nollställer eventuella fel.
     try {
-      await createProduct(formState); // Skickar ny produktdata till API för skapande.
-      const productsData = await fetchProducts(); // Hämtar uppdaterad produktlista från API.
-      setProducts(productsData); // Uppdaterar lokalt produkttillstånd med uppdaterad lista.
-      resetForm(); // Formulär återställs efter skapande av produkt.
-    } catch (error) {
-      setError("Error creating product"); // Hanterar fel vid skapande av produkt.
+      const productsData = await fetchProducts(page, 10); // Hämtar produkter för aktuell sida (10 åt gången).
+      if (productsData.length < 10) setHasMore(false); // Om färre än 10 produkter laddas finns inga fler att ladda.
+      setProducts((prevProducts) => [
+        // Uppdaterar produktlistan utan dubbletter.
+        ...prevProducts,
+        ...productsData.filter(
+          (product: Product) => !prevProducts.some((p) => p._id === product._id)
+        ),
+      ]);
+    } catch {
+      setError("Error fetching products"); // Hanterar fel vid hämtning.
+    } finally {
+      setLoading(false); // Stänger av laddningsindikatorn.
     }
-  };
+  }, [page]); // Effektens beroende av sidnummer (page).
 
-  // Funktion för att uppdatera en befintlig produkt.
-  const handleUpdate = async () => {
-    if (editingProductId) {
-      try {
+  // useEffect körs när komponenten laddas och varje gång fetchProductsData ändras.
+  useEffect(() => {
+    fetchProductsData(); // Hämtar produkter när komponenten monteras eller sidnummer ändras.
+  }, [fetchProductsData]);
+
+  // Funktion för att ladda fler produkter (ökar sidnumret).
+  const loadMoreProducts = () => setPage((prevPage) => prevPage + 1);
+
+  // Hanterar skapande eller uppdatering av produkter.
+  const handleCreateOrUpdate = async () => {
+    try {
+      if (editingProductId) {
+        // Om vi redigerar en produkt, uppdatera den.
         await updateProduct(editingProductId, {
           ...formState,
           _id: editingProductId,
-        }); // Skickar uppdaterad produktdata till API för uppdatering.
-        const productsData = await fetchProducts(); // Hämtar uppdaterad produktlista från API.
-        setProducts(productsData); // Uppdaterar lokalt produkttillstånd med uppdaterad lista.
-        resetForm(); // Formulär återställs efter uppdatering av produkt.
-      } catch (error) {
-        setError("Error updating product"); // Hanterar fel vid uppdatering av produkt.
+        });
+      } else {
+        // Annars, skapa en ny produkt.
+        await createProduct(formState);
       }
+      setProducts(await fetchProducts()); // Uppdaterar produktlistan efter ändringar.
+      resetForm(); // Återställ formuläret.
+    } catch {
+      setError(
+        editingProductId ? "Error updating product" : "Error creating product"
+      ); // Hanterar eventuella fel.
     }
   };
 
-  // Funktion för att ta bort en produkt.
+  // Hanterar radering av en specifik produkt.
   const handleDelete = async (id: string) => {
-    try {
-      await deleteProduct(id); // Skickar ID för produkt som ska tas bort till API.
-      const productsData = await fetchProducts(); // Hämtar uppdaterad produktlista från API.
-      setProducts(productsData); // Uppdaterar lokalt produkttillstånd med uppdaterad lista.
-    } catch (error) {
-      setError("Error deleting product"); // Hanterar fel vid borttagning av produkt.
-    }
-  };
-
-  const handleDeleteAll = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete all products?"
-    );
-    if (confirmDelete) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      // Bekräftar raderingen från användaren.
       try {
-        await deleteAllProducts();
-        setProducts([]);
-      } catch (error) {
-        setError("Error deleting all products");
+        await deleteProduct(id); // Raderar produkten med angivet ID.
+        setProducts(await fetchProducts()); // Uppdaterar produktlistan efter radering.
+      } catch {
+        setError("Error deleting product"); // Hanterar fel vid radering.
       }
     }
   };
 
-  // Funktion för att få produkter med lågt lager.
+  // Hanterar radering av alla produkter.
+  const handleDeleteAll = async () => {
+    if (window.confirm("Are you sure you want to delete all products?")) {
+      // Bekräftar raderingen från användaren.
+      try {
+        await deleteAllProducts(); // Raderar alla produkter.
+        setProducts([]); // Nollställer produktlistan.
+      } catch {
+        setError("Error deleting all products"); // Hanterar fel vid radering.
+      }
+    }
+  };
+
+  // Funktion för att hämta produkter med låg lagerstatus.
   const handleFetchLowStock = async () => {
     try {
-      const lowStockData = await fetchLowStockProducts();
-      setProducts(lowStockData);
-    } catch (error) {
-      setError("Error fetching low stock products");
+      setProducts(await fetchLowStockProducts()); // Hämtar och uppdaterar produkter med låg lagerstatus.
+    } catch {
+      setError("Error fetching low stock products"); // Hanterar fel.
     }
   };
 
-  // Funktion för att få produkter med kritiskt lager.
+  // Funktion för att hämta produkter med kritisk lagerstatus.
   const handleFetchCriticalStock = async () => {
     try {
-      const criticalStockData = await fetchCriticalStockProducts();
-      setProducts(criticalStockData);
-    } catch (error) {
-      setError("Error fetching critical stock products");
+      setProducts(await fetchCriticalStockProducts()); // Hämtar produkter med kritisk lagerstatus.
+    } catch {
+      setError("Error fetching critical stock products"); // Hanterar fel.
     }
   };
 
+  // Funktion för att hämta det totala lagervärdet.
   const handleFetchTotalStock = async () => {
     try {
-      const totalStock = await fetchTotalStockValue();
-      setTotalStockValue(totalStock);
-    } catch (error) {
-      setError("Error fetching total stock value");
+      setTotalStockValue(await fetchTotalStockValue()); // Hämtar och lagrar det totala lagervärdet.
+    } catch {
+      setError("Error fetching total stock value"); // Hanterar fel.
     }
   };
 
+  // Funktion för att hämta tillverkare och visa tillverkningskort.
   const handleFetchManufacturers = async () => {
     if (showManufacturers) {
+      // Om tillverkarna redan visas, döljer vi dem.
       setShowManufacturers(false);
     } else {
+      // Annars hämtar vi tillverkare från servern.
       try {
-        const manufacturersData = await fetchManufacturers();
-        setManufacturers(manufacturersData);
-        setShowManufacturers(true);
-      } catch (error) {
-        setError("Error fetching manufacturers");
+        setManufacturers(await fetchManufacturers());
+        setShowManufacturers(true); // Visar tillverkarna.
+      } catch {
+        setError("Error fetching manufacturers"); // Hanterar fel.
       }
     }
   };
 
+  // Funktion för att hämta total lagerstatus per tillverkare (loggar data i konsolen).
   const handleFetchStockValueByManufacturer = async () => {
     try {
-      const stockValueByManufacturer =
-        await fetchTotalStockValueByManufacturer();
-      console.log(stockValueByManufacturer);
-    } catch (error) {
-      setError("Error fetching stock value by manufacturer");
+      console.log(await fetchTotalStockValueByManufacturer()); // Loggar total lagerstatus per tillverkare.
+    } catch {
+      setError("Error fetching stock value by manufacturer"); // Hanterar fel.
     }
   };
 
-  // Funktion för att hantera ändringar i formulärfält för produktdetaljer.
+  // Hanterar förändringar i formulärets inputfält.
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    const { name, value } = e.target; // Hämtar namnet och värdet från inputfältet.
+    setFormState((prev) => ({ ...prev, [name]: value })); // Uppdaterar formulärstillståndet.
   };
 
-  // Funktion för att hantera ändringar i formulärfält för tillverkardetaljer.
+  // Hanterar förändringar i tillverkardelen av formuläret.
   const handleManufacturerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
-      manufacturer: {
-        ...prevState.manufacturer,
-        [name]: value,
-      },
+    setFormState((prev) => ({
+      ...prev,
+      manufacturer: { ...prev.manufacturer, [name]: value },
     }));
   };
 
-  // Funktion för att hantera ändringar i formulärfält för kontaktinformation.
+  // Hanterar förändringar i kontaktuppgifterna i formuläret.
   const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
+    setFormState((prev) => ({
+      ...prev,
       manufacturer: {
-        ...prevState.manufacturer,
-        contact: {
-          ...prevState.manufacturer.contact,
-          [name]: value,
-        },
+        ...prev.manufacturer,
+        contact: { ...prev.manufacturer.contact, [name]: value },
       },
     }));
   };
 
+  // Funktion för att visa alla produkter.
   const handleShowAllProducts = async () => {
     try {
-      const productsData = await fetchProducts();
-      setProducts(productsData);
-    } catch (error) {
+      setProducts(await fetchProducts());
+    } catch {
       setError("Error fetching all products");
     }
   };
 
-  // Funktion för att återställa formuläret till ursprungstillstånd.
+  // Återställer formuläret till standardvärden.
   const resetForm = () => {
-    setFormState({
-      name: "",
-      description: "",
-      price: 0,
-      amountInStock: 0,
-      sku: "",
-      category: "",
-      manufacturer: {
-        name: "",
-        country: "",
-        website: "",
-        description: "",
-        address: "",
-        contact: {
-          name: "",
-          email: "",
-          phone: "",
-        },
-      },
-    });
-    setEditingProductId(null); // Återställer ID för redigering till null.
+    setFormState(resetFormState); // Återställ formulärstillståndet.
+    setEditingProductId(null); // Nollställer redigeringsläget.
   };
 
-  // Filtrerar produkter baserat på söksträngen.
   const filteredProducts = products.filter((product) => {
-    const name = product.name ? product.name.toLowerCase() : "";
-    const manufacturerName = product.manufacturer?.name
-      ? product.manufacturer.name.toLowerCase()
-      : "";
-    const id = product._id ? product._id.toLowerCase() : "";
-
     const query = searchQuery.toLowerCase();
-
     return (
-      name.includes(query) ||
-      manufacturerName.includes(query) ||
-      id.includes(query)
+      product.name?.toLowerCase().includes(query) ||
+      product.manufacturer?.name?.toLowerCase().includes(query) ||
+      product._id?.toLowerCase().includes(query)
     );
   });
 
@@ -289,7 +247,6 @@ const ProductList: React.FC = () => {
     <div className="container mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4 text-neutral-100">Product List</h1>
 
-      {/* Sökformulär */}
       <div className="mb-6">
         <input
           type="text"
@@ -300,20 +257,16 @@ const ProductList: React.FC = () => {
         />
       </div>
 
-      {/* Loader */}
       {loading && <Loader />}
-
-      {/* Felmeddelande */}
       {error && <p className="text-center text-red-500">{error}</p>}
 
-      {/* Props som skickas vidare till ProductForm komponenten. */}
       <ProductForm
         product={formState}
         isEditing={!!editingProductId}
         onInputChange={handleInputChange}
         onManufacturerChange={handleManufacturerChange}
         onContactChange={handleContactChange}
-        onSubmit={editingProductId ? handleUpdate : handleCreate}
+        onSubmit={handleCreateOrUpdate}
         resetForm={resetForm}
         onDeleteAll={handleDeleteAll}
         onFetchLowStock={handleFetchLowStock}
@@ -350,18 +303,8 @@ const ProductList: React.FC = () => {
                   amountInStock: product.amountInStock,
                   sku: product.sku,
                   category: product.category,
-                  manufacturer: product.manufacturer || {
-                    name: "",
-                    country: "",
-                    website: "",
-                    description: "",
-                    address: "",
-                    contact: {
-                      name: "",
-                      email: "",
-                      phone: "",
-                    },
-                  },
+                  manufacturer:
+                    product.manufacturer || resetFormState.manufacturer,
                 });
                 setEditingProductId(product._id || null);
               }}
@@ -372,6 +315,7 @@ const ProductList: React.FC = () => {
           <p className="text-center text-white">No products found</p>
         )}
       </div>
+
       <div className="flex items-center justify-center">
         {hasMore && (
           <button
