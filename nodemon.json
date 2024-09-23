@@ -1,0 +1,19 @@
+{
+  "watch": [
+    "server/GRAPHQLserver",
+    "server/RESTserver"
+  ],
+  "ext": "js,json,ts",
+  "ignore": [
+    "client/build",
+    "node_modules"
+  ],
+  "events": {
+    "restart": "echo 'Server restarted due to changes...'"
+  },
+  "execMap": {
+    "js": "node",
+    "ts": "ts-node"
+  },
+  "exec": "npm run dev --prefix server/GRAPHQLserver && npm run dev --prefix server/RESTserver"
+}

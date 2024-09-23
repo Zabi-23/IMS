@@ -1,0 +1,17 @@
+{
+  "name": "ims",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server/GRAPHQLserver\" \"npm run dev --prefix server/RESTserver\"",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server/GRAPHQLserver\" \"npm run dev --prefix server/RESTserver\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.7"
+  }
+}
