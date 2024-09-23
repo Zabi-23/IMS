@@ -296,7 +296,7 @@ const ProductList: React.FC = () => {
         onShowAllProducts={handleShowAllProducts}
       />
 
-      <div className="flex flex-row gap-6 flex-wrap justify-center mb-20">
+      <div className="flex flex-row gap-6 flex-wrap justify-center">
         {showManufacturers ? (
           filteredManufacturers.length > 0 ? (
             filteredManufacturers.map((manufacturer) => (
@@ -338,7 +338,7 @@ const ProductList: React.FC = () => {
         {hasMore && (
           <button
             onClick={loadMoreProducts}
-            className="m-10 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700"
+            className="m-10 bg-blue-500 text-white p-2 w-1/4 rounded-md hover:bg-blue-700"
           >
             Show More
           </button>
