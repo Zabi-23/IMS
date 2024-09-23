@@ -22,6 +22,7 @@ import ProductForm from "./ProductForm";
 import ProductCard from "./ProductCard";
 import ManufacturerCard from "./ManufacturerCard";
 import Loader from "./Loader"; // Komponent för att visa laddningsindikator.
+import { ScrollToTopButton } from "./scrollToTopButton";
 
 const ProductList: React.FC = () => {
   // Använder useState för att hantera olika tillstånd (state) i komponenten.
@@ -113,9 +114,12 @@ const ProductList: React.FC = () => {
         setProducts((prevProducts) => [newProduct, ...prevProducts]); // Lägger till den nya produkten överst.
       }
       resetForm(); // Återställ formuläret.
-    } catch (error: Error | any) {
-      // Sätter ett felmeddelande baserat på vad backend returnerar.
-      setError(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
@@ -271,10 +275,11 @@ const ProductList: React.FC = () => {
         />
       </div>
 
+      <ScrollToTopButton />
       {loading && <Loader />}
       {error && (
-        <p className="text-center text-lg text-white underline font-bold bg-red-500 rounded-md shadow-lg animate-pulse transition duration-300 ease-in-out w-fit mx-auto">
-          🚨 {error} 🚨
+        <p className="text-center text-l p-2 text-white bg-red-500 rounded-md w-fit mx-auto">
+          {error}
         </p>
       )}
 

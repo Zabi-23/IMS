@@ -1,5 +1,9 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Product } from "../types";
+
+interface BackendError {
+  message: string;
+}
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -8,12 +12,18 @@ export const createProduct = async (productData: Product) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/product/`, productData);
     return response.data;
-  } catch (error: Error | any) {
-    if (error.response && error.response.data && error.response.data.message) {
-      throw new Error(error.response.data.message);
-    } else {
-      throw new Error("Error creating product. Please try again.");
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<BackendError>;
+      if (
+        axiosError.response &&
+        axiosError.response.data &&
+        axiosError.response.data.message
+      ) {
+        throw new Error(axiosError.response.data.message);
+      }
     }
+    throw new Error("Error creating product. Please try again.");
   }
 };
 
