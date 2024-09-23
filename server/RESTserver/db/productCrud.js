@@ -1,8 +1,20 @@
 const productModel = require("./models/product");
 
 const createProduct = async (productData) => {
-  const product = new productModel(productData);
-  return product.save();
+  try {
+    const existingProduct = await productModel.findOne({
+      $or: [{ name: productData.name }, { sku: productData.sku }],
+    });
+
+    if (existingProduct) {
+      throw new Error("Product with the same name or SKU already exists, please try again.");
+    }
+
+    const product = new productModel(productData);
+    return product.save();
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
 };
 
 const findProducts = async () => {
@@ -44,7 +56,9 @@ const getCriticalStockProducts = async () => {
       .find({
         amountInStock: { $lt: 5 },
       })
-      .select("manufacturer contact.name contact.phone contact.email amountInStock");
+      .select(
+        "manufacturer contact.name contact.phone contact.email amountInStock"
+      );
     return criticalStockProducts;
   } catch (error) {
     throw new Error(

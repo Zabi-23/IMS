@@ -33,13 +33,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <>
           <p className="text-gray-500">ID: {product._id}</p>
           <p className="text-lg font-bold">{product.name}</p>
-          <p className="text-gray-600 font-semibold">{product.description}</p>
-          <p className="mt-2 text-gray-500 font-semibold">
-            Price: ${product.price}
+          <p className="text-cyan-700 font-semibold">{product.description}</p>
+          <p className="font-semibold">
+            <span className="text-gray-500">Price:</span>{" "}
+            <span>${product.price}</span>
           </p>
-          <p className={`mt-2 font-semibold ${stockColorClass}`}>
-            Stock: {product.amountInStock}
+          <p className="font-semibold">
+            <span className="text-gray-500">Stock:</span>{" "}
+            <span className={stockColorClass}>{product.amountInStock}</span>
           </p>
+          <p className="font-semibold">
+            <span className="text-gray-500">SKU:</span>{" "}
+            <span>{product.sku}</span>
+          </p>
+          <p className="font-semibold">
+            <span className="text-gray-500">Category:</span>{" "}
+            <span>{product.category}</span>
+          </p>
+
           {product.manufacturer ? (
             <ManufacturerCard manufacturer={product.manufacturer} />
           ) : (

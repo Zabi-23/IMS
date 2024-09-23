@@ -32,29 +32,43 @@ const Mutation = new GraphQLObjectType({
         contactPhone: { type: GraphQLString },
         amountInStock: { type: GraphQLInt },
       },
-      resolve(_, args) {
-        const newProduct = new Product({
-          name: args.name,
-          sku: args.sku,
-          description: args.description,
-          price: args.price,
-          category: args.category,
-          manufacturer: {
-            name: args.manufacturerName,
-            country: args.manufacturerCountry,
-            website: args.manufacturerWebsite,
-            description: args.manufacturerDescription,
-            address: args.manufacturerAddress,
-            contact: {
-              name: args.contactName,
-              email: args.contactEmail,
-              phone: args.contactPhone,
-            },
-          },
-          amountInStock: args.amountInStock,
-        });
+      async resolve(_, args) {
+        try {
+          const existingProduct = await Product.findOne({
+            $or: [{ name: args.name }, { sku: args.sku }],
+          });
 
-        return newProduct.save();
+          if (existingProduct) {
+            throw new Error(
+              "Product with the same name or SKU already exists, please try again."
+            );
+          }
+
+          const newProduct = new Product({
+            name: args.name,
+            sku: args.sku,
+            description: args.description,
+            price: args.price,
+            category: args.category,
+            manufacturer: {
+              name: args.manufacturerName,
+              country: args.manufacturerCountry,
+              website: args.manufacturerWebsite,
+              description: args.manufacturerDescription,
+              address: args.manufacturerAddress,
+              contact: {
+                name: args.contactName,
+                email: args.contactEmail,
+                phone: args.contactPhone,
+              },
+            },
+            amountInStock: args.amountInStock,
+          });
+
+          return await newProduct.save();
+        } catch (error) {
+          throw new Error(`Failed to create product: ${error.message}`);
+        }
       },
     },
     // Update an existing product

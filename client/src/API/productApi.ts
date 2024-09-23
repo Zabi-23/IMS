@@ -8,16 +8,21 @@ export const createProduct = async (productData: Product) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/product/`, productData);
     return response.data;
-  } catch (error) {
-    console.error("Error creating product:", error);
-    throw error;
+  } catch (error: Error | any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Error creating product. Please try again.");
+    }
   }
 };
 
 // Function to get all products with pagination.
 export const fetchProducts = async (page = 1, limit = 10) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/product/?page=${page}&limit=${limit}`);
+    const response = await axios.get(
+      `${API_BASE_URL}/product/?page=${page}&limit=${limit}`
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -37,7 +42,10 @@ export const fetchProductById = async (productId: string) => {
 };
 
 // Function to update a product by ID.
-export const updateProduct = async (productId: string, productData: Product) => {
+export const updateProduct = async (
+  productId: string,
+  productData: Product
+) => {
   try {
     const response = await axios.put(
       `${API_BASE_URL}/product/${productId}`,
