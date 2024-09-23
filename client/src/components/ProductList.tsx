@@ -284,7 +284,7 @@ const ProductList: React.FC = () => {
         onShowAllProducts={handleShowAllProducts}
       />
 
-      <div className="flex flex-row gap-6 flex-wrap justify-center">
+      <div className="flex flex-row gap-6 flex-wrap justify-center mb-20">
         {showManufacturers ? (
           manufacturers.length > 0 ? (
             manufacturers.map((manufacturer) => (
