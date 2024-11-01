@@ -1,63 +1,35 @@
-const mongoose = require("mongoose");
-const { faker } = require("@faker-js/faker");
-const dotenv = require("dotenv");
-const { Product } = require("./models/Product"); // Justera sökvägen om nödvändigt
+//GRAFQLserver/seed.js
 
+const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const typeDefs = require("./schema");
+const resolvers = require("./resolvers");
+
+// Ladda miljövariabler från .env-filen
 dotenv.config();
 
-const DB = process.env.DATABASE.replace(
-  "<db_PASSWORD>",
-  process.env.DATABASE_PASSWORD
-).replace("<db_NAME>", process.env.DB_NAME);
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+// Kontrollera att DATABASE är definierad
+const DB = process.env.DATABASE;
+if (!DB) {
+    console.error("DATABASE URI is not defined.");
+    process.exit(1);
+}
 
 mongoose
   .connect(DB)
-  .then(() => {
-    console.log("Connected to MongoDB");
-    generateFakeData();
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("Error connecting to MongoDB:", err));
+
+const server = new ApolloServer({ typeDefs, resolvers });
+
+server.start().then(() => {
+  server.applyMiddleware({ app });
+  app.listen(PORT, () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
   });
-
-async function generateFakeData() {
-  try {
-    await Product.deleteMany({}); // Radera tidigare data
-
-    const products = [];
-    for (let i = 0; i < 100; i++) {
-      const manufacturer = {
-        name: faker.company.name(),
-        country: faker.location.country(),
-        website: faker.internet.url(),
-        description: faker.lorem.sentence(),
-        address: faker.location.streetAddress(),
-        contact: {
-          name: faker.person.fullName(),
-          email: faker.internet.email(),
-          phone: faker.phone.number(),
-        },
-      };
-
-      const product = {
-        name: faker.commerce.productName(),
-        sku: faker.number.int(),
-        description: faker.commerce.productDescription(),
-        price: parseFloat(faker.commerce.price()),
-        category: faker.commerce.department(),
-        manufacturer: manufacturer,
-        amountInStock: faker.number.int({ min: 0, max: 1000 }),
-      };
-
-      products.push(product);
-    }
-
-    await Product.insertMany(products);
-    console.log("Fake data generated successfully");
-  } catch (error) {
-    console.error("Error generating fake data:", error);
-  } finally {
-    mongoose.connection.close();
-  }
-}
-
+});
